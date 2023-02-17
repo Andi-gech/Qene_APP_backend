@@ -10,7 +10,7 @@ from .pagination import defaultPagination
 from rest_framework.filters import SearchFilter,OrderingFilter
 from .models import Course,Enroll,course_outlines,Course_details,Quiz,Questions,Answer
 from rest_framework.viewsets import ModelViewSet,GenericViewSet
-from .permitions import ISADMINORREADONLY,ISENrolled
+from .permitions import ISADMINORREADONLY,ISENrolled,ISMYcourse
 from .serializers import CourseSerializer,EnrolSerializer,CourseOutlineSerializer,CoursedetailSerializer,QuizSerializer,QuestionSERializer,AnswerSerilizer,ProfileSerializer
 # Create your views here.
 class CourseVIewSet(ModelViewSet):
@@ -21,12 +21,17 @@ class CourseVIewSet(ModelViewSet):
     search_fields=['Course_name','description']
     ordering_fields=['Course_name']
     permission_classes=[ISADMINORREADONLY]
+    def get_serializer_context(self):
+        return {
+            'userid':self.request.user.id
+        }
+
 
     
 
 
 class MyCourseViewSet(ModelViewSet):
-    permission_classes=[IsAuthenticated]
+    permission_classes=[IsAuthenticated,ISMYcourse]
     def get_queryset(self):
         (student,created)=Profile.objects.get_or_create(user_id=self.request.user.id)
         print(self.request.user.id)
@@ -52,7 +57,7 @@ class CourseOutlineViewSet(ModelViewSet):
         }
 
 class CourseDetailViewset(ModelViewSet):
-    permission_classes=[IsAuthenticated,ISADMINORREADONLY]
+    permission_classes=[IsAuthenticated,ISADMINORREADONLY,ISENrolled]
     def get_queryset(self):
        
         return Course_details.objects.filter(courseoutlinee_id=self.kwargs['outline_pk'])
@@ -66,7 +71,7 @@ class CourseDetailViewset(ModelViewSet):
 
 
 class QuizVIewSet(ModelViewSet):
-    permission_classes=[IsAuthenticated,ISADMINORREADONLY]
+    permission_classes=[IsAuthenticated,ISADMINORREADONLY,ISENrolled]
     def get_queryset(self):
         return Quiz.objects.filter( courseoutlines_id=self.kwargs['outline_pk'])
     serializer_class=QuizSerializer
@@ -75,7 +80,7 @@ class QuizVIewSet(ModelViewSet):
             'courseoutlines_id':self.kwargs['outline_pk']
         }
 class QuestionsViewSet(ModelViewSet):
-    permission_classes=[IsAuthenticated,ISADMINORREADONLY]
+    permission_classes=[IsAuthenticated,ISADMINORREADONLY,ISENrolled]
     def get_queryset(self):
         return Questions.objects.filter(quiz_id=self.kwargs['quize_pk'])
     serializer_class=QuestionSERializer
@@ -85,7 +90,7 @@ class QuestionsViewSet(ModelViewSet):
         }
 
 class AnswerViewSet(ModelViewSet):
-    permission_classes=[IsAuthenticated,ISADMINORREADONLY]
+    permission_classes=[IsAuthenticated,ISADMINORREADONLY,ISENrolled]
     def get_queryset(self):
         return Answer.objects.filter(question_id=self.kwargs['question_pk'])
     serializer_class=AnswerSerilizer

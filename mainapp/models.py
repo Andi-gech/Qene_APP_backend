@@ -43,9 +43,9 @@ class course_outlines(models.Model):
 class Course_details(models.Model):
     date_created=models.DateTimeField(auto_now=True)
     courseoutlinee=models.ForeignKey(course_outlines, on_delete=models.CASCADE)
-    text_content=models.TextField()
-    code_content=models.TextField()
-    image_content=models.TextField()
+    text_content=models.TextField(null=True)
+    code_content=models.TextField(null=True)
+    image_content=models.TextField(null=True)
     def __str__(self) :
         return self.text_content
 

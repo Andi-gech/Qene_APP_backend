@@ -4,9 +4,16 @@ from .models import Course,Profile,Course_details,Enroll,course_outlines,Quiz,Qu
 from djoser.serializers import UserCreateSerializer as BaseUSercreateSerializer,UserSerializer as baseuserSerilizer
 
 class CourseSerializer(serializers.ModelSerializer):
+    Teacher=serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model=Course
         fields=['id','Course_name','Teacher','description']
+    def save(self, **kwargs):
+        (teacher,created)=Profile.objects.get_or_create(user_id=self.context['userid'])
+        if teacher:
+            self.validated_data['Teacher'] = teacher
+        return super().save(**kwargs)
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model=Profile
